@@ -41,7 +41,7 @@ SOURCE_COLUMNS = [
     "dti",
     "emp_length",
     "earliest_cr_line",
-    "issue_d",
+    "issue_d",  # Preserve loan issue date
     "open_acc",
     "delinq_2yrs",
     "home_ownership",
@@ -211,11 +211,23 @@ for chunk_number, chunk in enumerate(
         columns=FEATURE_MAPPING
     )
 
+    # Preserve the original loan issue date as metadata.
+    # It will be used for chronological splitting, NOT as a predictor.
+    eligible["issue_date"] = pd.to_datetime(
+        eligible["issue_d"],
+        format="%b-%Y",
+        errors="coerce",
+    )
+
     feature_columns = list(FEATURE_MAPPING.values())
 
     model_df = eligible[
         feature_columns
-        + ["credit_history_length", "default"]
+        + [
+            "credit_history_length",
+            "default",
+            "issue_date",
+        ]
     ].copy()
 
     # --------------------------------------------------------
